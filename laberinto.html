@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Canvas</title>
+	<style type="text/css">
+		canvas{
+			background-color: gray;
+		}
+	</style>
+</head>
+<body>
+	<canvas id="canvas" width="400" height="400"></canvas>
+	<script type="text/javascript">
+		var canvas = null, ctx = null, x = 200, y = 200;
+		var player = null, playerSize = 20;
+		var pausa = false, walls = Array(), wallX = 0, wallY = 0, over = false;
+		var playe_body = new Image();
+
+		var mapa = [
+					  	[3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
+					  	[3, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 2, 3],
+					  	[3, 1, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 3],
+					  	[3, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 1, 3],
+					  	[3, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 1, 3],
+					  	[3, 1, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 3],
+					  	[3, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 3],
+					  	[3, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 3],
+					  	[3, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 3],
+					  	[3, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 3],
+					  	[3, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 3],
+					  	[3, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 3],
+					  	[3, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 1, 3],
+					  	[3, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 3],
+					  	[3, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 0, 1, 3],
+					  	[3, 1, 1, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 3],
+					  	[3, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 3],
+					  	[3, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3],
+					  	[3, 2, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3],
+					  	[3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+					];
+
+		window.requestAnimationFrame = (function()
+		{
+			return window.requestAnimationFrame || 
+				window.mozRequestAnimationFrame ||
+				window.webkitRequestAnimationFrame ||
+				function (callback)
+				{
+					window.setTimeout(callback,17);
+				}
+		}());
+
+		function Rectangulo(x, y, w, h, c)
+		{
+			this.x = x;
+			this.y = y;
+			this.w = w;
+			this.h = h;
+			this.c = c;
+
+			this.paint = function(ctx)
+			{
+				ctx.fillStyle = this.c;
+				ctx.fillRect(this.x, this.y, this.w, this.h);
+			}
+
+			this.intersects = function(target)
+			{
+				if( this.x < target.x + target.w  && 
+					this.x + this.w > target.x    &&
+					this.y < target.y + target.h  &&
+					this.y + this.h > target.y)
+				{
+					return true;
+				}
+			}
+		}
+
+		function paint(ctx)
+		{
+			ctx.fillStyle = "#000";
+			ctx.fillRect(0,0,canvas.width,canvas.height);
+
+			if(pausa)
+			{
+				ctx.fillStyle = "#00FF00";
+				ctx.font = "15px Arial";
+				ctx.fillText("Juego pausado ESPACIO para continuar", 60, canvas.height-5);
+			}
+
+			if(over)
+			{
+				ctx.fillStyle = "#00FF00";
+				ctx.font = "15px Arial";
+				ctx.fillText("Game Over", 150, canvas.height-5);
+				setTimeout("location.reload()",3000);
+			}
+
+			ctx.drawImage(playe_body, player.x, player.y, playerSize, playerSize);
+
+			for(var i = 0; i <walls.length;i++)
+			{
+				walls[i].paint(ctx);
+			}
+		}
+
+		function upt()
+		{
+			if(!pausa)
+			{
+				if(!over)
+				{
+					for(var i = 0; i <walls.length;i++)
+					{
+						if (player.intersects(walls[i])) 
+						{
+							over = true;
+						}
+					}
+				}
+			}
+		}
+
+		//se repite mucho
+		function run()
+		{
+			window.requestAnimationFrame(run)
+			upt();
+			paint(ctx);
+		}
+
+		function init()
+		{
+			canvas = document.getElementById('canvas');
+			ctx = canvas.getContext('2d');
+			over = false;
+
+			player = new Rectangulo(x,y,playerSize,playerSize,"#00FF00");
+			playe_body.src = "player.png";
+
+			for(var i=0; i<playerSize; i++)
+			{
+				for(var j=0; j<playerSize; j++)
+				{
+					if(mapa[i][j] == 1)
+					{
+						walls.push(new Rectangulo(wallX,wallY,playerSize,playerSize,"cyan"));
+						wallX += playerSize;
+					}
+					else if(mapa[i][j] == 2)
+					{
+						walls.push(new Rectangulo(wallX,wallY,playerSize,playerSize,"red"));
+						wallX += playerSize;	
+					}
+					else if(mapa[i][j] == 3)
+					{
+						walls.push(new Rectangulo(wallX,wallY,playerSize,playerSize,"gray"));
+						wallX += playerSize;	
+					}
+					else
+					{
+						wallX += playerSize;
+					}
+				}
+				wallX = 0;
+				wallY += playerSize;
+			}
+
+			run();
+		}
+
+		window.addEventListener('load',init,false);  
+
+		document.addEventListener('keydown', (e) => 
+		{
+		  	const keyName = event.key;
+
+		  	if(!over)
+			  	switch(keyName)
+				{
+					case "ArrowRight":
+						console.log((player.x/playerSize)+" "+(player.y/playerSize));
+						console.log(mapa[player.x/playerSize+1][player.y/playerSize]);
+						if(mapa[player.y/playerSize][player.x/playerSize+1] == 0 ||
+						   mapa[player.y/playerSize][player.x/playerSize+1] == 2)
+							player.x += 20;
+					break;
+					case "ArrowLeft":
+						if(mapa[player.y/playerSize][player.x/playerSize-1] == 0 ||
+						   mapa[player.y/playerSize][player.x/playerSize-1] == 2)
+							player.x -= 20;
+					break;
+					case "ArrowDown":
+						if(mapa[player.y/playerSize+1][player.x/playerSize] == 0 ||
+						   mapa[player.y/playerSize+1][player.x/playerSize] == 2)
+							player.y += 20;
+					break;
+					case "ArrowUp":
+						if(mapa[player.y/playerSize-1][player.x/playerSize] == 0 ||
+						   mapa[player.y/playerSize-1][player.x/playerSize] == 2)
+							player.y -=20;
+					break;
+				}
+
+		  	if(keyName == " " && !over)
+		  	{
+		  		pausa = !pausa;
+		  	}
+		});
+
+	</script>
+</body>
+	
+</html>
