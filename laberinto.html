@@ -4,7 +4,12 @@
 	<title>Canvas</title>
 	<style type="text/css">
 		canvas{
-			background-color: gray;
+			margin-left: 30%;
+			margin-top: 3%;
+		}
+		body{
+			background-image: url('fondo.jpg');
+			background-size: cover;
 		}
 	</style>
 </head>
@@ -14,7 +19,8 @@
 		var canvas = null, ctx = null, x = 15*20, y = 14*20;
 		var player = null, playerSize = 20;
 		var pausa = false, walls = Array(), wallX = 0, wallY = 0, over = false;
-		var playe_body = new Image();
+		var playe_body = new Image(), pared = new Image(), puerta = new Image(), mar = new Image();
+		var ahh = new Audio(), victory = new Audio(), fondo = new Audio();
 
 		var mapa = [
 					  	[3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3],
@@ -27,25 +33,25 @@
 					  	[3, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 3],
 					  	[3, 1, 0, 0, 0, 0, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 3],
 					  	[3, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 3],
-					  	[3, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+					  	[3, 1, 0, 1, 1, 0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 3],
 					  	[3, 1, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 0, 3],
 					  	[3, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 3],
 					  	[3, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 0, 3],
 					  	[3, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 1, 3],
 					  	[3, 1, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 1, 1, 0, 1, 0, 1, 1, 3],
-					  	[3, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 1, 1, 3],
+					  	[3, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 0, 1, 0, 1, 1, 3],
 					  	[3, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 0, 3],
 					  	[3, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 3],
 					  	[3, 1, 1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 3],
 					  	[3, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 3],
-					  	[3, 0, 0, 0, 1, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3],
+					  	[3, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 3],
 					  	[3, 1, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 0, 3],
-					  	[3, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 0, 1, 3],
-					  	[3, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 3],
-					  	[3, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 1, 3],
-					  	[3, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 3],
-					  	[3, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3],
-					  	[3, 2, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0, 1, 3],
+					  	[3, 1, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 0, 1, 0, 1, 3],
+					  	[3, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 1, 0, 1, 0, 0, 1, 0, 1, 1, 1, 0, 1, 3],
+					  	[3, 1, 0, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 1, 3],
+					  	[3, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1, 3],
+					  	[3, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 3],
+					  	[3, 2, 0, 0, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 3],
 					  	[3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
 					];
 
@@ -71,7 +77,8 @@
 			this.paint = function(ctx)
 			{
 				ctx.fillStyle = this.c;
-				ctx.fillRect(this.x, this.y, this.w, this.h);
+				//ctx.fillRect(this.x, this.y, this.w, this.h);
+				ctx.drawImage(this.c, this.x, this.y, this.w, this.h);
 			}
 
 			this.intersects = function(target)
@@ -88,26 +95,25 @@
 
 		function paint(ctx)
 		{
-			ctx.fillStyle = "#000";
+			ctx.fillStyle = "rgb(232, 200, 168)";
 			ctx.fillRect(0,0,canvas.width,canvas.height);
 
 			if(pausa)
 			{
-				ctx.fillStyle = "#00FF00";
+				ctx.fillStyle = "#000";
 				ctx.font = "18px Arial";
 				ctx.fillText("Juego pausado ESPACIO para continuar", 150, canvas.height-5);
 			}
 
 			if(over)
 			{
-				ctx.fillStyle = "#00FF00";
+				ctx.fillStyle = "#000";
 				ctx.font = "18px Arial";
 				ctx.fillText("Game Over", 255, canvas.height-5);
 				setTimeout("location.reload()",3000);
 			}
 
 			ctx.drawImage(playe_body, player.x, player.y, playerSize, playerSize);
-
 			for(var i = 0; i <walls.length;i++)
 			{
 				walls[i].paint(ctx);
@@ -127,6 +133,8 @@
 							if(player.y/playerSize == 1 && player.x/playerSize == 28)
 							{
 								over = true;
+								fondo.pause();
+								victory.play();
 							}
 							if(player.y/playerSize == 28 && player.x/playerSize == 1)
 							{
@@ -140,6 +148,7 @@
 								while(mapa[y][x]!=0);
 								player.x = x*20;
 								player.y = y*20;
+								ahh.play();
 							}
 						}
 					}
@@ -161,8 +170,16 @@
 			ctx = canvas.getContext('2d');
 			over = false;
 
-			player = new Rectangulo(x,y,playerSize,playerSize,"#00FF00");
 			playe_body.src = "player.png";
+			player = new Rectangulo(x, y, playerSize, playerSize, playe_body);
+			
+			pared.src = "pared.png";
+			puerta.src = "puerta.png";
+			mar.src = "mar.png";
+			ahh.src = "ahh.mp3"; 
+			victory.src = "victory.mp3";
+			fondo.src = "fondo.mp3";
+			fondo.volume = 0.2;
 
 			for(var i=0; i<30; i++)
 			{
@@ -170,17 +187,17 @@
 				{ 
 					if(mapa[i][j] == 1)
 					{
-						walls.push(new Rectangulo(wallX,wallY,playerSize,playerSize,"cyan"));
+						walls.push(new Rectangulo(wallX,wallY,playerSize,playerSize,pared));
 						wallX += playerSize;
 					}
 					else if(mapa[i][j] == 2)
 					{
-						walls.push(new Rectangulo(wallX,wallY,playerSize,playerSize,"red"));
+						walls.push(new Rectangulo(wallX,wallY,playerSize,playerSize,puerta));
 						wallX += playerSize;	
 					}
 					else if(mapa[i][j] == 3)
 					{
-						walls.push(new Rectangulo(wallX,wallY,playerSize,playerSize,"gray"));
+						walls.push(new Rectangulo(wallX,wallY,playerSize,playerSize,pared));
 						wallX += playerSize;	
 					}
 					else
@@ -200,8 +217,9 @@
 		document.addEventListener('keydown', (e) => 
 		{
 		  	const keyName = event.key;
-
 		  	if(!over && !pausa)
+		  	{
+		  		fondo.play();
 			  	switch(keyName)
 				{
 					case "ArrowRight":
@@ -225,9 +243,14 @@
 							player.y -=20;
 					break;
 				}
+			}
 
 		  	if(keyName == " " && !over)
 		  	{
+		  		if(fondo.paused) 
+					fondo.play();
+		  		else
+		  			fondo.pause();
 		  		pausa = !pausa;
 		  	}
 		});
